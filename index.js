@@ -1,6 +1,7 @@
 const sharp = require('sharp');
 const fs = require('fs');
 const yargs = require('yargs');
+const path = require('path');
 
 const argv = yargs
     .scriptName('npx github:wararyo/coreink-image-converter')
@@ -18,47 +19,51 @@ const argv = yargs
         default: './'
     })
     .command('$0 [files..]', 'the default command', () => {}, (argv) => {
-        console.log('this command will be run by default');
-        console.log(argv.files);
-        console.log(argv.output);
         if(argv.files === void 0) {
             console.error('\x1b[31mInput files are not specified.\x1b[0m');
-            console.error('See npx github:wararyo/coreink-image-converter --help .');
+            console.error('See `npx github:wararyo/coreink-image-converter -- --help` .');
         } else {
-            
+            console.log(argv.files);
+            let output = path.dirname(argv.output);
+            console.log(argv.output);
+            for(file of argv.files) {
+                if(fs.existsSync(file)) Generate(file, output);
+            }
         }
       })
     .help()
     .argv;
 
-process.exit(0);
+async function Generate(filePath, outputPath, resize = false, resizeForce = false){
 
-if(process.argv[2] == void 0 || (process.argv[2] != void 0 && !fs.existsSync(process.argv[2]))){
-    console.log(`Usage: npx github:wararyo/coreink-image-converter [ImageFilePath]`);
-    process.exit(0);
-}
+    let image = await sharp(filePath).gamma().greyscale().raw();
+    if(resizeForce || resize) image.resize({width: 200, height:200, fit: 'contain', background: {r:255,g:255,b:255,alpha:1}, withoutEnlargement: !resizeForce });
+    let buffer = await image.toBuffer();
+    let metadata = await image.metadata();
 
-let filePath = process.argv[2];
+    let tempbyte = 0b00000000;
+    let tempbyteCursor = 0;
+    let arrayCount = 0;//改行のために使用
 
-(async() => {
+    let length = Math.ceil(buffer.length / 8);
 
-let image = await sharp(filePath).gamma().greyscale().raw().toBuffer();
+    let output = `unsigned char image[${length}] = {`;
 
-let tempbyte = 0b00000000;
-let tempbyteCursor = 0;
-
-console.log("unsigned char image[5000] = {");
-
-for (byte of image.entries()) {
-    tempbyte |= (byte.value > 127) << (7-tempbyteCursor);
-    if(tempbyteCursor == 7){
-        tempbyteCursor = 0;
-        console.log(`0x${tempbyte.toString(16)}, `);
+    for (byte of buffer.entries()) {
+        tempbyte |= (byte[1] > 127) << (7-tempbyteCursor);
+        if(byte[0] == buffer.length - 1) { //画像の終端
+            output += `0x${tempbyte.toString(16)}};`;
+        }
+        else if(tempbyteCursor == 7){ // 8ビット単位で文字列化
+            tempbyteCursor = 0;
+            if(arrayCount % (metadata.width / 8) == 0) output += '\n';
+            arrayCount++;
+            output += `0x${tempbyte.toString(16)}, `;
+            tempbyte = 0b00000000;
+            tempbyteCursor = 0;
+        }
+        else tempbyteCursor++;
     }
-    else tempbyteCursor++;
-    if(byte.index == image.length - 1) {
-        console.log(`0x${tempbyte.toString(16)}};`);
-    }
-}
 
-})();
+    fs.writeFileSync(outputPath + '/' + path.basename(filePath,path.extname(filePath)) + '.c', output);
+}
