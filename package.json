@@ -1,0 +1,30 @@
+{
+  "name": "coreink-image-converter",
+  "version": "1.0.0",
+  "description": "Utility for M5Stack CoreInk which converts image files into array",
+  "main": "index.js",
+  "bin": {
+    "coreink-image-converter": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wararyo/coreink-image-converter.git"
+  },
+  "keywords": [
+    "M5Stack"
+  ],
+  "author": "wararyo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wararyo/coreink-image-converter/issues"
+  },
+  "homepage": "https://github.com/wararyo/coreink-image-converter#readme",
+  "dependencies": {
+    "sharp": "^0.26.2",
+    "yargs": "^16.1.0"
+  }
+}
