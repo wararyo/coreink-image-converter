@@ -18,5 +18,5 @@ npx github:wararyo/coreink-image-converter [options] [files..]
 
 ```
 npx github:wararyo/coreink-image-converter example.png
-npx github:wararyo/coreink-image-converter images/* converted/
+npx github:wararyo/coreink-image-converter images/* -o converted/
 ```
