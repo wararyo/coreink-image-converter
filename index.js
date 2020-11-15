@@ -23,7 +23,7 @@ const argv = yargs
     .command('$0 [files..]', 'the default command', () => {}, (argv) => {
         if(argv.files === void 0) {
             console.error('\x1b[31mInput files are not specified.\x1b[0m');
-            console.error('See `npx github:wararyo/coreink-image-converter -- --help` .');
+            console.error('See `npx github:wararyo/coreink-image-converter --help` .');
         } else {
             console.log(argv.files);
             let output = path.dirname(argv.output);
