@@ -4,7 +4,7 @@
   "description": "Utility for M5Stack CoreInk which converts image files into array",
   "main": "index.js",
   "bin": {
-    "coreink-image-converter": "node index.js"
+    "coreink-image-converter": "index.js"
   },
   "scripts": {
     "start": "node index.js",
