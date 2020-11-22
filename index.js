@@ -37,6 +37,7 @@ const argv = yargs
     .argv;
 
 async function Generate(filePath, outputPath, resize = false, resizeForce = false){
+    let name = path.basename(filePath,path.extname(filePath));
 
     let image = await sharp(filePath).gamma().greyscale().raw();
     if(resizeForce || resize) image.resize({width: 200, height:200, fit: 'contain', background: {r:255,g:255,b:255,alpha:1}, withoutEnlargement: !resizeForce });
@@ -49,7 +50,7 @@ async function Generate(filePath, outputPath, resize = false, resizeForce = fals
 
     let length = Math.ceil(buffer.length / 8);
 
-    let output = `unsigned char image[${length}] = {`;
+    let output = `unsigned char image_${name}[${length}] = {`;
 
     for (byte of buffer.entries()) {
         tempbyte |= (byte[1] > 127) << (7-tempbyteCursor);
@@ -67,5 +68,5 @@ async function Generate(filePath, outputPath, resize = false, resizeForce = fals
         else tempbyteCursor++;
     }
 
-    fs.writeFileSync(outputPath + '/' + path.basename(filePath,path.extname(filePath)) + '.c', output);
+    fs.writeFileSync(outputPath + '/' + name + '.h', output);
 }
